@@ -9,7 +9,7 @@ void cargarDatos(char* path);
 void bubbleShort(vector<int> &A);
 unsigned long long int buscadorRepeticiones(vector<int> A,vector<int> B);
 std::pair<int, int> counter(vector<int> A, int n);
-int searchBin(vector<int> A, int n);
+int searchBinary(vector<int> A, int n);
 
 
 
@@ -32,18 +32,51 @@ void cargarDatos(char* path){
     return;
 }
 
+void swap(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
 
-void bubbleShort(vector<int> &A){
-    int n = A.size();
-    for(int i = 0; i < n-1; i++){
-        for(int j = 0; j < n-i-1; j++){
-            if(A[j] > A[j+1]){
-                int temp = A[j];
-                A[j] = A[j+1];
-                A[j+1] = temp;
-            }
+// Función de partición
+int partition(vector<int>& vec, int low, int high) {
+    int pivot = vec[high]; // Elegimos el último elemento como pivote
+    int i = low - 1; // Índice del elemento más pequeño
+
+    for (int j = low; j < high; j++) {
+        if (vec[j] < pivot) { // Si el elemento actual es menor que el pivote
+            i++;
+            swap(vec[i], vec[j]);
         }
     }
+    swap(vec[i + 1], vec[high]);
+    return i + 1;
+}
+
+// Función recursiva de Quick Sort
+void quickSort(vector<int>& vec, int low, int high) {
+    if (low < high) {
+        int pi = partition(vec, low, high); // Índice de partición
+
+        // Ordenar recursivamente las dos mitades
+        quickSort(vec, low, pi - 1);
+        quickSort(vec, pi + 1, high);
+    }
+}
+
+void sortVector(vector<int>& vec) {
+    quickSort(vec, 0, vec.size() - 1);
+}
+
+std::pair<int, int> counter(vector<int> A, int n){
+    int count = 0;
+    int index = searchBinary(A, n);
+    if (index != -1) {
+        for (int i = index; i < A.size() && A[i] == n; ++i) {
+            count++;
+        }
+    }
+    return std::make_pair(index, count);
 }
 
 unsigned long long int buscadorRepeticiones(vector<int> A,vector<int> B){
@@ -66,45 +99,38 @@ unsigned long long int buscadorRepeticiones(vector<int> A,vector<int> B){
 //en caso de que no se encuentre, devuelve -1
 //en caso de que haya mas de un valor igual, devuelve la primera posicion
 
-std::pair<int, int> counter(vector<int> A, int n){
-    int count = 0;
-    int index = searchBin(A, n);
-    if (index != -1) {
-        for (int i = index; i < A.size() && A[i] == n; ++i) {
-            count++;
-        }
-    }
-    return std::make_pair(index, count);
-}
 
-int searchBin(vector<int> A, int n){
-    int l = 0;
-    int r = A.size()-1;
-    int m = 0;
-    while (l <= r){//busca el valor n en el vector A
-        m = l + (r-l)/2;
-        if (A[m] == n){
-                while (1){//busca la primera posicion en la que se encuentra el valor n
-                    if (m == 0){
-                        return 0;
-                    }else if (A[m-1] != n){
-                        return m;
-                    }else{
-                        m--;
+
+int searchBinary(std::vector<int> data, int target) {
+    int left = 0;
+    int right = data.size() - 1;
+    int mid = 0;
+
+    while (left <= right) { // Busca el valor target en el vector data
+        mid = left + (right - left) / 2;
+
+        if (data[mid] == target) {
+            while (true) { // Busca la primera posición en la que se encuentra el valor target
+                if (mid == 0) {
+                    return 0;
+                } else if (data[mid - 1] != target) {
+                    return mid;
+                } else {
+                    mid--;
                 }
             }
         }
-        if (A[m] < n){
-            l = m + 1;
-        }
-        else{
-            r = m - 1;
+
+        if (data[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
         }
     }
-    
-    return -1;
 
+    return -1;
 }
+
 
 int main(int argc, char* argv[]){
     if (argc != 2){
@@ -113,8 +139,8 @@ int main(int argc, char* argv[]){
     }
     char* path = argv[1];
     cargarDatos(path);
-    bubbleShort(Right);
-    bubbleShort(Left);
+    sortVector(Right);
+    sortVector(Left);
     cout << buscadorRepeticiones(Left, Right);
     return 0;
 }
